@@ -7,13 +7,13 @@
 #let accent-red = (dark: rgb("#b51f1f"), light: rgb("#e63312"))
 #let accent-orange = (dark: rgb("#cc621a"), light: rgb("#f7a600"))
 
-#let unirennes-colors = (
-  primary,
-  accent-green,
-  accent-cyan,
-  accent-blue,
-  accent-purple,
-  accent-pink,
-  accent-red,
-  accent-orange,
-)
+// #let unirennes-colors = (
+//   primary,
+//   accent-green,
+//   accent-cyan,
+//   accent-blue,
+//   accent-purple,
+//   accent-pink,
+//   accent-red,
+//   accent-orange,
+// )

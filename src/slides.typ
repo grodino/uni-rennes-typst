@@ -46,7 +46,7 @@
         spacing: 0em,
         stack(dir: ltr, if meta.logos != none {
           block(width: 37%, inset: 1em, columns(2, for logo in meta.logos {
-            image(logo, width: 100%)
+            logo
           }))
         }, align(center + horizon, text(size: 1.7em, fill: primary.dark)[
           #text(
@@ -65,6 +65,7 @@
 
       // People
       if meta.people != none {
+        set image(width: 2 * 2.4cm)
         block(
           width: PRESENTATION-16-9.width,
           height: 40%,
@@ -78,7 +79,7 @@
             center + horizon,
             for person in meta.people {
               box(width: 100% / meta.people.len())[
-                #image(person.last(), width: 2 * 2.4cm)
+                #person.last()
                 #place(
                   top + center,
                   circle(radius: 2.4cm, stroke: 6pt + accent-blue.light.darken(50%)),
@@ -135,8 +136,8 @@
         v(1em)
         text(
           fill: primary.light,
+          weight: "light",
           style: "italic",
-          weight: "bold",
           size: 24pt,
           font: "Newsreader",
           subtitle,
@@ -191,7 +192,10 @@
 
         #stack(
           dir: ltr,
-          box(image(meta.logo), width: size, height: size),
+          {
+            set image(width: size, height: size)
+            meta.logo
+          },
           box(
             height: size,
             width: 100% - size,
@@ -299,6 +303,8 @@
 
   // Hide level 1 headings but keep them in the TOC
   show heading.where(level: 1): it => utils.register-section(it.body)
+
+  show heading: set text(font: "UniRennes", size: 32pt)
 
   // Regular text properties
   set text(font: "Newsreader", weight: "light", size: 22pt)

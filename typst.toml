@@ -1,0 +1,12 @@
+[package]
+name = "uni-rennes"
+version = "0.1.0"
+entrypoint = "lib.typ"
+authors = ["Augustin Godinot <aaugustin.godinot@univ-rennes.fr>"]
+license = "MIT"
+description = "A typst template to create reports (soon), slides and posters with the Université de Rennes graphic charter."
+repository = "https://github.com/grodino/uni-rennes-typst"
+
+[template]
+path = "template"
+entrypoint = "main.typ"

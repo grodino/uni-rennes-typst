@@ -1,8 +1,8 @@
 #import "colors.typ": *
 
-#let header(author, title, logo, logos) = grid(columns: (1.1fr, 6fr, 2fr), rows: (100%,))[
+#let header(author, title, logos) = grid(columns: (1.1fr, 6fr, 2fr), rows: (100%,))[
   #set align(center + horizon)
-  #image(logo, width: 10cm)
+  #logos.at("left")
 ][
   #set align(left + horizon)
 
@@ -12,23 +12,13 @@
   #text(size: 34pt, author)
 ][
   #set align(center + horizon)
-  #stack(
-    dir: ltr,
-    spacing: 1em,
-    stack(
-      box(image("logos/inria.png", height: 3cm)),
-      box(image("logos/irisa.png", height: 3cm)),
-    ),
-    // box(image("logos/wide.png", height: 4cm)),
-    box(image("logos/peren.png", height: 7cm)),
-  )
+  #logos.at("right")
 ]
 
 #let unirennes-poster(
   author: [],
   title: [],
   info: [],
-  logo: none,
   logos: none,
   split-size: 25%,
   notes: "hide",
@@ -41,7 +31,7 @@
     margin: (x: 0pt, bottom: 2cm, top: 10cm),
     header-ascent: 0pt,
     footer-descent: 0pt,
-    header: header(author, title, logo, logos),
+    header: header(author, title, logos),
     footer: block(fill: black, width: 100%, height: 100%, inset: (x: 1em))[
       #set align(horizon)
       #set text(fill: white)
@@ -51,12 +41,6 @@
 
   // List marker
   set list(marker: sym.triangle.filled.r)
-
-  // Strong with a different color
-  // show strong: set text(fill: accent-blue.light)
-
-  // emph with a different color
-  // show emph: set text(fill: accent-orange.light)
 
   // Regular text properties
   set text(font: "Newsreader", size: 32pt)
