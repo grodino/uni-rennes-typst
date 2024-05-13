@@ -5,22 +5,13 @@
 // GLOBAL THEME INFO                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 #let file-meta = state("file-meta")
+#let is-appendix = state("is-appendix", false)
 #let PRESENTATION-16-9 = (width: 841.89pt, height: 473.56pt)
-
-#let unirennes-slide(body) = locate(loc => {
-  let meta = file-meta.at(loc)
-  let page_num = logic.logical-slide.at(loc).first()
-
-  // Display the slide
-  polylux-slide({
-    body
-  })
-})
 
 ////////////////////////////////////////////////////////////////////////////////
 // TITLE SLIDE                                                                //
 ////////////////////////////////////////////////////////////////////////////////
-#let title-slide(body) = unirennes-slide(
+#let title-slide(body) = polylux-slide(
   locate(
     loc => {
       // Displays the title slide. Takes information passed to the theme when it
@@ -54,7 +45,6 @@
             fill: accent-blue.light.darken(50%),
             meta.title,
           )
-          #v(-35pt)
           #text(size: .5em, style: "oblique", font: "Newsreader", meta.subtitle)
 
           #text(size: .4em, weight: "regular")[
@@ -109,7 +99,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Displays the title and relevant information in the left banner
-#let displayed-title(title, subtitle: none, vignette: none) = locate(
+#let displayed-title(title, subtitle: none, vignette: none, appendix: false) = locate(
   loc => {
     let meta = file-meta.at(loc)
     set align(bottom)
@@ -123,12 +113,7 @@
       //////////////////////////////////////////////////////////////////////////
       // Slide title
       #set align(top)
-      #text(
-        font: "UniRennes",
-        fill: primary.light,
-        size: 28pt,
-        heading(level: 3, title),
-      )
+      #text(font: "UniRennes", fill: primary.light, heading(level: 2, title))
 
       //////////////////////////////////////////////////////////////////////////
       // Slide subtitle
@@ -163,7 +148,11 @@
       #if sections.len() > 0 {
         current-section = sections.last().body
 
-        for item in query(heading.where(level: 1), loc) {
+        for item in query(heading.where(level: 1, outlined: true), loc) {
+          if item.body == [Appendix] {
+            continue
+          }
+
           if item.body != current-section {
             text(fill: primary.light, font: "UniRennes", size: 16pt, item.body)
           } else {
@@ -181,83 +170,90 @@
     ]
 
     if meta.logo != none {
-      block(
-        width: 100%,
-        inset: 10pt,
-      )[
+      block(width: 100%, inset: 10pt)[
         #set align(left + bottom)
         #set text(size: 12pt, fill: primary.light)
 
         #let size = 2em
 
-        #stack(
-          dir: ltr,
-          {
-            set image(width: size, height: size)
-            meta.logo
-          },
-          box(
-            height: size,
-            width: 100% - size,
-          )[
-            #set align(right + horizon)
+        #stack(dir: ltr, {
+          set image(width: size, height: size)
+          meta.logo
+        }, box(height: size, width: 100% - size)[
+          #set align(right + horizon)
 
-            // FIXME: Displaying the page number has a side effect and creates a "layout not converging error"
-            #logic.logical-slide.display() /
-            #logic.logical-slide.final(loc).first() \
-            //
-            #meta.short-authors
-          ],
-        )
+          #if appendix == false {
+            logic.logical-slide.display() + "/"
+            numbering("1", logic.logical-slide.final(loc).first())
+          } else {
+            "Appx. " + logic.logical-appendix.display("1") + "/"
+            numbering("1", logic.logical-appendix.final(loc).first())
+          } \
+          //
+          #meta.short-authors
+        ])
       ]
     }
   },
 )
 
-// Creates a note, tied to the page it was declared in
-// #let note(content) = locate(
-//   loc => [
-//     #metadata((note: content, page: logic.logical-slide.at(loc).first())) <note>
-//   ],
-// )
-
 ////////////////////////////////////////////////////////////////////////////////
 // SLIDES DECLARATIONS                                                        //
 ////////////////////////////////////////////////////////////////////////////////
-#let slide(title: none, subtitle: none, vignette: none, body) = locate(loc => {
-  let meta = file-meta.at(loc)
+#let slide(title: none, subtitle: none, vignette: none, appendix: false, body) = locate(
+  loc => {
+    let meta = file-meta.at(loc)
 
-  unirennes-slide({
-    box(
-      width: meta.split-size * PRESENTATION-16-9.width,
-      height: 100%,
-      outset: 0em,
-      baseline: 0em,
-      stroke: none,
-      fill: accent-blue.light.darken(50%),
-      displayed-title(title, subtitle: subtitle, vignette: vignette),
+    polylux-slide(
+      appendix: appendix,
+      {
+        box(
+          width: meta.split-size * PRESENTATION-16-9.width,
+          height: 100%,
+          outset: 0em,
+          baseline: 0em,
+          stroke: none,
+          fill: accent-blue.light.darken(50%),
+          displayed-title(title, subtitle: subtitle, vignette: vignette, appendix: appendix),
+        )
+        box(
+          width: (100% - meta.split-size) * PRESENTATION-16-9.width,
+          height: 100%,
+          outset: 0em,
+          inset: 1em,
+          baseline: 0em,
+          stroke: none,
+          fill: primary.light,
+        )[
+          #set align(left + horizon)
+          #set text(fill: primary.dark)
+          #body
+        ]
+      },
     )
-    box(
-      width: (100% - meta.split-size) * PRESENTATION-16-9.width,
-      height: 100%,
-      outset: 0em,
-      inset: 1em,
-      baseline: 0em,
-      stroke: none,
-      fill: primary.light,
-    )[
-      #set align(left + horizon)
-      #set text(fill: primary.dark)
-      #body
-    ]
-  })
-})
+  },
+)
 
-#let slide-full(body) = unirennes-slide(box(inset: 1em, width: PRESENTATION-16-9.width, height: 100%)[
-  #set align(center + horizon)
-  #set text(fill: primary.dark)
-  #body
-])
+#let slide-full(body, appendix: false, fill: white) = polylux-slide(
+  appendix: appendix,
+  box(inset: 1em, width: PRESENTATION-16-9.width, height: 100%, fill: fill)[
+    #set align(center + horizon)
+    #set text(fill: primary.dark)
+    #body
+  ],
+)
+
+////////////////////////////////////////////////////////////////////////////////
+// NOTES                                                                      //
+////////////////////////////////////////////////////////////////////////////////
+#let note(body) = locate(
+  loc => {
+    // Ignore notes that come from duplicated slides
+    if logic.subslide.at(loc).first() <= 1 [
+      #metadata((page: logic.logical-slide.at(loc).first(), body: body)) <note>
+    ]
+  },
+)
 
 #let notes-page() = locate(loc => page(paper: "a4", margin: 1em)[
   #let notes = query(<note>, loc)
@@ -266,7 +262,7 @@
   #for note in notes {
     text(size: 16pt, weight: "bold", [Slide #note.value.page])
     linebreak()
-    note.value.note
+    note.value.body
     parbreak()
   }
 ])
@@ -301,13 +297,31 @@
   // emph with a different color
   show emph: set text(fill: accent-orange.light)
 
+  // Headings :
+  //  - level 1 is never displayed (only in TOC). Used from structure
+  //  - level 2 is used for slides titles
+  //  - level 3- is used inside the slides
+
   // Hide level 1 headings but keep them in the TOC
   show heading.where(level: 1): it => utils.register-section(it.body)
 
-  show heading: set text(font: "UniRennes", size: 32pt)
+  // Heading font properties
+  show heading.where(level: 2): set text(font: "UniRennes", size: 28pt)
 
   // Regular text properties
   set text(font: "Newsreader", weight: "light", size: 22pt)
+
+  // Change the marker for lists
+  set list(marker: (sym.triangle.filled.r, $=>$))
+
+  // Change the font of the labeled lists
+  show terms.item: it => [
+    #set par(hanging-indent: terms.hanging-indent)
+
+    #text(font: "UniRennes", weight: "bold", it.term)
+    #terms.separator
+    #it.description\
+  ]
 
   // Save all the theme information in a state container
   file-meta.update((
@@ -322,10 +336,8 @@
     notes: notes,
   ))
 
-  // Display all the notes in a4 pages
-  if "page" in notes {
-    notes-page()
-  }
-
   body
+
+  // Display all the notes in a4 pages
+  if "page" in notes { notes-page() }
 }
